@@ -1,0 +1,162 @@
+use locker;
+
+CREATE TABLE IF NOT EXISTS locker.department (
+  departmentid INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(25) NOT NULL,
+  city VARCHAR(15) NULL DEFAULT NULL,
+  budget DECIMAL(8,2) NULL DEFAULT NULL,
+  dateinserted DATE NULL,
+  lastupdatedate DATE NULL,
+  PRIMARY KEY (departmentid),
+  UNIQUE INDEX department_id_UNIQUE (departmentid ASC) VISIBLE);
+  
+  
+  CREATE 
+    TRIGGER  insertDate
+ BEFORE INSERT ON department FOR EACH ROW 
+    SET new . lastupdatedate = CURDATE();
+
+INSERT INTO department (departmentid,name, cdepartmentity,budget,dateinserted)
+VALUES (1001, 'ITdepartment','BL', 2000.34,'2022-06-26'),
+(1001, 'ITdepartment','BL', 2000.34,'2022-06-26');
+
+SELECT 
+    *
+FROM
+    department;
+    
+DELETE FROM department 
+WHERE
+    departmentid = 1001;
+
+
+-- -----------------------------------------------------
+-- Table `locker`.`employee`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `locker`.`employee` (
+  `employeeId` INT NOT NULL AUTO_INCREMENT,
+  `salary` DECIMAL(8,2) NULL DEFAULT NULL,
+  `lastname` VARCHAR(25) NULL DEFAULT NULL,
+  `firstname` VARCHAR(25) NULL DEFAULT NULL,
+  `street` VARCHAR(45) NULL DEFAULT NULL,
+  `city` VARCHAR(45) NULL DEFAULT NULL,
+  `state` VARCHAR(45) NULL DEFAULT NULL,
+  `zipcode` VARCHAR(45) NULL DEFAULT NULL,
+  `departmentid` INT NOT NULL,
+  `dateofbirth` DATE NULL,
+  `dateinserted` DATE NULL,
+  `lastupdatedate` DATE NULL,
+  PRIMARY KEY (`employeeId`),
+  UNIQUE INDEX `employeeId_UNIQUE` (`employeeId` ASC) VISIBLE,
+  INDEX `fk_employee_department1_idx` (`departmentid` ASC) VISIBLE,
+  CONSTRAINT `fk_employee_department1`
+    FOREIGN KEY (`departmentid`)
+    REFERENCES `locker`.`department` (`departmentid`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `locker`.`equipment`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `locker`.`equipment` (
+  `equipmentId` INT NOT NULL AUTO_INCREMENT,
+  `cost` DECIMAL(8,2) NULL DEFAULT NULL,
+  `type` VARCHAR(25) NOT NULL,
+  `name` VARCHAR(45) NULL,
+  `serialnumber` VARCHAR(15) NOT NULL,
+  `description` VARCHAR(45) NULL,
+  `dateinserted` DATE NULL,
+  `lastupdatedate` DATE NULL,
+  UNIQUE INDEX `equipmentSerialNumber_UNIQUE` (`serialnumber` ASC) VISIBLE,
+  UNIQUE INDEX `equipmentType_equipmentId_UNIQUE` (`equipmentId` ASC) VISIBLE,
+  INDEX `fk_equipment_equipmentType1_idx` (`equipmentId` ASC) VISIBLE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `locker`.`inventory`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `locker`.`inventory` (
+  `inventoryId` INT NOT NULL AUTO_INCREMENT,
+  `equipmentId` INT NOT NULL,
+  `backlog` INT NULL DEFAULT NULL,
+  `quantity` DECIMAL(8,2) NULL DEFAULT NULL,
+  `dateinserted` DATE NULL,
+  `lastupdatedate` DATE NULL,
+  PRIMARY KEY (`inventoryId`),
+  UNIQUE INDEX `stockId_UNIQUE` (`inventoryId` ASC) VISIBLE,
+  INDEX `fk_inventory_equipment1_idx` (`equipmentId` ASC) VISIBLE,
+  CONSTRAINT `fk_inventory_equipment1`
+    FOREIGN KEY (`equipmentId`)
+    REFERENCES `locker`.`equipment` (`equipmentId`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `locker`.`request`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `locker`.`request` (
+  `requestid` INT NOT NULL AUTO_INCREMENT,
+  `employeeId` INT NOT NULL,
+  `equipmentId` INT NOT NULL,
+  `quantity` INT NOT NULL DEFAULT '1',
+  `dateinserted` DATE NULL,
+  `lastupdatedate` DATE NULL,
+  INDEX `fk_employee_has_equipment_equipment1_idx` (`equipmentId` ASC) VISIBLE,
+  INDEX `fk_employee_has_equipment_employee1_idx` (`employeeId` ASC) VISIBLE,
+  PRIMARY KEY (`requestid`),
+  UNIQUE INDEX `requestid_UNIQUE` (`requestid` ASC) VISIBLE,
+  CONSTRAINT `fk_employee_has_equipment_employee1`
+    FOREIGN KEY (`employeeId`)
+    REFERENCES `locker`.`employee` (`employeeId`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_employee_has_equipment_equipment1`
+    FOREIGN KEY (`equipmentId`)
+    REFERENCES `locker`.`equipment` (`equipmentId`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `locker`.`delivery`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `locker`.`delivery` (
+  `deliveryId` INT NOT NULL AUTO_INCREMENT,
+  `requestid` INT NOT NULL,
+  `cost` DECIMAL(8,2) NULL DEFAULT NULL,
+  `company` VARCHAR(25) NOT NULL,
+  `address` VARCHAR(45) NOT NULL,
+  `status` VARCHAR(25) NOT NULL,
+  `dateinserted` DATE NULL,
+  `lastupdatedate` DATE NULL,
+  PRIMARY KEY (`deliveryId`),
+  UNIQUE INDEX `shipment_id_UNIQUE` (`deliveryId` ASC) VISIBLE,
+  INDEX `fk_delivery_request1_idx` (`requestid` ASC) VISIBLE,
+  CONSTRAINT `fk_delivery_request1`
+    FOREIGN KEY (`requestid`)
+    REFERENCES `locker`.`request` (`requestid`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
